@@ -107,8 +107,6 @@ function WorkflowCanvasInner() {
         onConnect={onConnect}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
-        onDrop={onDrop}
-        onDragOver={onDragOver}
         fitView
       />
     </div>

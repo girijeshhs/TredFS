@@ -12,9 +12,7 @@ export default function ApprovalForm({
   data,
   onChange,
 }: ApprovalFormProps) {
-  const title = data.title ?? "";
-  const approverRole = data.approverRole ?? "";
-  const threshold = data.threshold ?? 0;
+  const { title, approverRole, threshold } = data;
 
   return (
     <div className="space-y-4">

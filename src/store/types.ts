@@ -1,5 +1,3 @@
-import type { Connection, EdgeChange, NodeChange } from "reactflow";
-
 export type NodeType = "start" | "task" | "approval" | "end";
 
 export type StartNodeData = {
@@ -60,15 +58,9 @@ export type WorkflowState = {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
   selectedNode: WorkflowNode | null;
-  simulationSteps: string[];
-  simulationWarnings: string[];
   setNodes: (nodes: WorkflowNode[]) => void;
   setEdges: (edges: WorkflowEdge[]) => void;
   setSelectedNode: (node: WorkflowNode | null) => void;
-  addNode: (type: NodeType, position: { x: number; y: number }) => void;
-  applyNodeChanges: (changes: NodeChange[]) => void;
-  applyEdgeChanges: (changes: EdgeChange[]) => void;
-  addConnection: (connection: Connection) => void;
+  createNode: (type: NodeType, position: { x: number; y: number }) => void;
   updateNodeData: (id: string, newData: Partial<WorkflowNodeData>) => void;
-  setSimulationResult: (result: SimulationResult) => void;
 };

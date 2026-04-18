@@ -1,4 +1,3 @@
-import { addEdge, applyEdgeChanges, applyNodeChanges } from "reactflow";
 import { create } from "zustand";
 
 import { createNodeId } from "@/utils/ids";
@@ -30,8 +29,6 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
   nodes: [],
   edges: [],
   selectedNode: null,
-  simulationSteps: [],
-  simulationWarnings: [],
   setNodes: (nodes: WorkflowNode[]) =>
     set((state) => {
       const normalized = nodes.map(normalizeNode);
@@ -43,7 +40,7 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
   setEdges: (edges: WorkflowEdge[]) => set({ edges }),
   setSelectedNode: (node: WorkflowNode | null) =>
     set({ selectedNode: node ? normalizeNode(node) : null }),
-  addNode: (type, position) =>
+  createNode: (type, position) =>
     set((state) => {
       const newNode = createWorkflowNode({
         id: createNodeId(),
@@ -57,18 +54,6 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
         selectedNode: newNode,
       };
     }),
-  applyNodeChanges: (changes) =>
-    set((state) => {
-      const updated = applyNodeChanges(changes, state.nodes).map(normalizeNode);
-      return {
-        nodes: updated,
-        selectedNode: syncSelectedNode(updated, state.selectedNode),
-      };
-    }),
-  applyEdgeChanges: (changes) =>
-    set((state) => ({ edges: applyEdgeChanges(changes, state.edges) })),
-  addConnection: (connection) =>
-    set((state) => ({ edges: addEdge(connection, state.edges) })),
   updateNodeData: (id: string, newData: Partial<WorkflowNodeData>) =>
     set((state) => ({
       nodes: state.nodes.map((node) =>
@@ -93,9 +78,4 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
             }
           : state.selectedNode,
     })),
-  setSimulationResult: (result) =>
-    set({
-      simulationSteps: result.steps,
-      simulationWarnings: result.warnings,
-    }),
 }));

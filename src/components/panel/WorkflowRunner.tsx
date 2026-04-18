@@ -1,25 +1,24 @@
-'use client';
+"use client";
 
-import { hasStartNode, simulateWorkflow } from "@/utils/workflowSimulation";
+import { useState } from "react";
+
+import type { SimulationResult } from "@/store/types";
 import { useWorkflowStore } from "@/store/workflowStore";
+import { hasStartNode, simulateWorkflow } from "@/utils/workflowSimulation";
 
 export default function WorkflowRunner() {
   const nodes = useWorkflowStore((state) => state.nodes);
   const edges = useWorkflowStore((state) => state.edges);
-  const simulationSteps = useWorkflowStore((state) => state.simulationSteps);
-  const simulationWarnings = useWorkflowStore(
-    (state) => state.simulationWarnings
-  );
-  const setSimulationResult = useWorkflowStore(
-    (state) => state.setSimulationResult
-  );
+  const [result, setResult] = useState<SimulationResult>({
+    steps: [],
+    warnings: [],
+  });
   const canRun = hasStartNode(nodes);
 
-  const hasOutput =
-    simulationSteps.length > 0 || simulationWarnings.length > 0;
+  const hasOutput = result.steps.length > 0 || result.warnings.length > 0;
 
   const handleRun = () => {
-    setSimulationResult(simulateWorkflow(nodes, edges));
+    setResult(simulateWorkflow(nodes, edges));
   };
 
   return (
@@ -59,13 +58,13 @@ export default function WorkflowRunner() {
         {hasOutput && (
           <>
             <div className="text-zinc-900">
-              {simulationSteps.length > 0
-                ? simulationSteps.join(" -> ")
+              {result.steps.length > 0
+                ? result.steps.join(" -> ")
                 : "No steps generated."}
             </div>
-            {simulationWarnings.length > 0 && (
+            {result.warnings.length > 0 && (
               <ul className="mt-2 space-y-1 text-xs text-amber-700">
-                {simulationWarnings.map((warning) => (
+                {result.warnings.map((warning) => (
                   <li key={warning}>{warning}</li>
                 ))}
               </ul>

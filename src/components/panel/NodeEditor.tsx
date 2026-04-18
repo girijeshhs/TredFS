@@ -1,27 +1,45 @@
-'use client';
-
-import { useCallback } from "react";
+"use client";
 
 import ApprovalForm from "@/components/forms/ApprovalForm";
 import TaskForm from "@/components/forms/TaskForm";
-import type { ApprovalNodeData, TaskNodeData } from "@/store/types";
+import type { WorkflowNode, WorkflowNodeByType, WorkflowNodeData } from "@/store/types";
 import { useWorkflowStore } from "@/store/workflowStore";
+
+type EditableNode =
+  | WorkflowNodeByType["task"]
+  | WorkflowNodeByType["approval"];
+
+type EditableNodeType = EditableNode["type"];
+
+const isEditableNode = (node: WorkflowNode): node is EditableNode =>
+  node.type === "task" || node.type === "approval";
+
+const formRenderers: Record<
+  EditableNodeType,
+  (
+    node: WorkflowNodeByType[EditableNodeType],
+    onChange: (id: string, data: Partial<WorkflowNodeData>) => void
+  ) => React.ReactNode
+> = {
+  task: (node, onChange) => (
+    <TaskForm
+      nodeId={node.id}
+      data={node.data as WorkflowNodeByType["task"]["data"]}
+      onChange={onChange}
+    />
+  ),
+  approval: (node, onChange) => (
+    <ApprovalForm
+      nodeId={node.id}
+      data={node.data as WorkflowNodeByType["approval"]["data"]}
+      onChange={onChange}
+    />
+  ),
+};
 
 export default function NodeEditor() {
   const selectedNode = useWorkflowStore((state) => state.selectedNode);
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
-
-  const updateTaskData = useCallback(
-    (id: string, newData: Partial<TaskNodeData>) =>
-      updateNodeData(id, newData),
-    [updateNodeData]
-  );
-
-  const updateApprovalData = useCallback(
-    (id: string, newData: Partial<ApprovalNodeData>) =>
-      updateNodeData(id, newData),
-    [updateNodeData]
-  );
 
   if (!selectedNode) {
     return null;
@@ -30,32 +48,11 @@ export default function NodeEditor() {
   const typeLabel =
     selectedNode.type.charAt(0).toUpperCase() + selectedNode.type.slice(1);
 
-  let content: React.ReactNode;
-
-  switch (selectedNode.type) {
-    case "task":
-      content = (
-        <TaskForm
-          nodeId={selectedNode.id}
-          data={selectedNode.data}
-          onChange={updateTaskData}
-        />
-      );
-      break;
-    case "approval":
-      content = (
-        <ApprovalForm
-          nodeId={selectedNode.id}
-          data={selectedNode.data}
-          onChange={updateApprovalData}
-        />
-      );
-      break;
-    default:
-      content = (
+  const content = isEditableNode(selectedNode)
+    ? formRenderers[selectedNode.type](selectedNode, updateNodeData)
+    : (
         <p className="text-sm text-zinc-500">No editable fields.</p>
       );
-  }
 
   return (
     <aside className="h-full w-80 border-l border-zinc-200 bg-white p-4">

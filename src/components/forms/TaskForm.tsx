@@ -8,9 +8,7 @@ type TaskFormProps = {
 };
 
 export default function TaskForm({ nodeId, data, onChange }: TaskFormProps) {
-  const title = data.title ?? "";
-  const description = data.description ?? "";
-  const assignee = data.assignee ?? "";
+  const { title, description, assignee } = data;
 
   return (
     <div className="space-y-4">

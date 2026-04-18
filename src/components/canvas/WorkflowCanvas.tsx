@@ -3,6 +3,9 @@
 import { useCallback, useRef } from "react";
 import ReactFlow, {
   ReactFlowProvider,
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges,
   useReactFlow,
   type Connection,
   type EdgeChange,
@@ -19,37 +22,32 @@ import { getDraggedNodeType } from "@/utils/dragAndDrop";
 function WorkflowCanvasInner() {
   const nodes = useWorkflowStore((state) => state.nodes);
   const edges = useWorkflowStore((state) => state.edges);
-  const applyNodeChangesStore = useWorkflowStore(
-    (state) => state.applyNodeChanges
-  );
-  const applyEdgeChangesStore = useWorkflowStore(
-    (state) => state.applyEdgeChanges
-  );
-  const addConnection = useWorkflowStore((state) => state.addConnection);
-  const addNode = useWorkflowStore((state) => state.addNode);
+  const setNodes = useWorkflowStore((state) => state.setNodes);
+  const setEdges = useWorkflowStore((state) => state.setEdges);
+  const createNode = useWorkflowStore((state) => state.createNode);
   const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
   const { project } = useReactFlow();
   const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      applyNodeChangesStore(changes);
+      setNodes(applyNodeChanges(changes, nodes) as WorkflowNode[]);
     },
-    [applyNodeChangesStore]
+    [nodes, setNodes]
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      applyEdgeChangesStore(changes);
+      setEdges(applyEdgeChanges(changes, edges) as WorkflowEdge[]);
     },
-    [applyEdgeChangesStore]
+    [edges, setEdges]
   );
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      addConnection(connection);
+      setEdges(addEdge(connection, edges));
     },
-    [addConnection]
+    [edges, setEdges]
   );
 
   const onNodeClick: NodeMouseHandler = useCallback(
@@ -87,9 +85,9 @@ function WorkflowCanvasInner() {
         y: event.clientY - bounds.top,
       });
 
-      addNode(nodeType, position);
+      createNode(nodeType, position);
     },
-    [addNode, project]
+    [createNode, project]
   );
 
   return (

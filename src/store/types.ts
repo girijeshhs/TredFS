@@ -1,0 +1,74 @@
+import type { Connection, EdgeChange, NodeChange } from "reactflow";
+
+export type NodeType = "start" | "task" | "approval" | "end";
+
+export type StartNodeData = {
+  label: string;
+};
+
+export type TaskNodeData = {
+  label: string;
+  title: string;
+  description: string;
+  assignee: string;
+};
+
+export type ApprovalNodeData = {
+  label: string;
+  title: string;
+  approverRole: string;
+  threshold: number;
+};
+
+export type EndNodeData = {
+  label: string;
+};
+
+export type NodeDataByType = {
+  start: StartNodeData;
+  task: TaskNodeData;
+  approval: ApprovalNodeData;
+  end: EndNodeData;
+};
+
+export type WorkflowNodeData = NodeDataByType[NodeType];
+
+export type WorkflowNodeByType = {
+  [K in NodeType]: {
+    id: string;
+    type: K;
+    position: { x: number; y: number };
+    data: NodeDataByType[K];
+  };
+};
+
+export type WorkflowNode = WorkflowNodeByType[NodeType];
+
+export type WorkflowEdge = {
+  id: string;
+  source: string;
+  target: string;
+  type?: string;
+};
+
+export type SimulationResult = {
+  steps: string[];
+  warnings: string[];
+};
+
+export type WorkflowState = {
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
+  selectedNode: WorkflowNode | null;
+  simulationSteps: string[];
+  simulationWarnings: string[];
+  setNodes: (nodes: WorkflowNode[]) => void;
+  setEdges: (edges: WorkflowEdge[]) => void;
+  setSelectedNode: (node: WorkflowNode | null) => void;
+  addNode: (type: NodeType, position: { x: number; y: number }) => void;
+  applyNodeChanges: (changes: NodeChange[]) => void;
+  applyEdgeChanges: (changes: EdgeChange[]) => void;
+  addConnection: (connection: Connection) => void;
+  updateNodeData: (id: string, newData: Partial<WorkflowNodeData>) => void;
+  setSimulationResult: (result: SimulationResult) => void;
+};

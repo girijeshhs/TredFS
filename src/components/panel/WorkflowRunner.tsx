@@ -1,31 +1,17 @@
 "use client";
 
-import { useState } from "react";
-
-import { simulateWorkflowAPI } from "@/api/mock";
-import type { SimulationResult } from "@/store/types";
+import { useWorkflowSimulation } from "@/hooks/useWorkflowSimulation";
 import { useWorkflowStore } from "@/store/workflowStore";
 
 export default function WorkflowRunner() {
   const nodes = useWorkflowStore((state) => state.nodes);
   const edges = useWorkflowStore((state) => state.edges);
-  const [result, setResult] = useState<SimulationResult>({
-    steps: [],
-    warnings: [],
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const { result, warnings, isLoading, runSimulation } = useWorkflowSimulation();
 
-  const hasOutput = result.steps.length > 0 || result.warnings.length > 0;
+  const hasOutput = result.steps.length > 0 || warnings.length > 0;
 
   const handleRun = async () => {
-    setIsLoading(true);
-
-    try {
-      const simulation = await simulateWorkflowAPI({ nodes, edges });
-      setResult(simulation);
-    } finally {
-      setIsLoading(false);
-    }
+    await runSimulation({ nodes, edges });
   };
 
   return (
@@ -64,9 +50,9 @@ export default function WorkflowRunner() {
                 ? result.steps.join(" -> ")
                 : "No steps generated."}
             </div>
-            {result.warnings.length > 0 && (
+            {warnings.length > 0 && (
               <ul className="mt-2 space-y-1 text-xs text-amber-700">
-                {result.warnings.map((warning) => (
+                {warnings.map((warning) => (
                   <li key={warning}>{warning}</li>
                 ))}
               </ul>

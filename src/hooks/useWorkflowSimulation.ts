@@ -32,7 +32,6 @@ export const useWorkflowSimulation = () => {
 
   return {
     result,
-    steps: result.steps,
     warnings: result.warnings,
     isLoading,
     runSimulation,

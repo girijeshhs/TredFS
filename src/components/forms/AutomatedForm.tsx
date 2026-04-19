@@ -19,29 +19,18 @@ export default function AutomatedForm({
   const [loadingAutomations, setLoadingAutomations] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-
     const loadAutomations = async () => {
       setLoadingAutomations(true);
 
       try {
-        const response = await getAutomations();
-
-        if (mounted) {
-          setAutomations(response);
-        }
+        const items = await getAutomations();
+        setAutomations(items);
       } finally {
-        if (mounted) {
-          setLoadingAutomations(false);
-        }
+        setLoadingAutomations(false);
       }
     };
 
     void loadAutomations();
-
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   const selectedAction = automations.find(

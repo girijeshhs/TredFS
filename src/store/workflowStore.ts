@@ -13,58 +13,25 @@ import type {
   WorkflowState,
 } from "./types";
 
-const syncSelectedNode = (
-  nodes: WorkflowNode[],
-  selectedNode: WorkflowNode | null
-): WorkflowNode | null => {
-  if (!selectedNode) {
-    return null;
-  }
-
-  const match = nodes.find((node) => node.id === selectedNode.id);
-  return match ? normalizeNode(match) : null;
-};
-
-const syncSelectedEdge = (
-  edges: WorkflowEdge[],
-  selectedEdgeId: string | null
-): string | null => {
-  if (!selectedEdgeId) {
-    return null;
-  }
-
-  const match = edges.some((edge) => edge.id === selectedEdgeId);
-  return match ? selectedEdgeId : null;
-};
-
-export const useWorkflowStore = create<WorkflowState>((set, get) => ({
+export const useWorkflowStore = create<WorkflowState>((set) => ({
   nodes: [],
   edges: [],
   selectedNode: null,
-  selectedEdgeId: null,
   setNodes: (nodes: WorkflowNode[]) =>
     set((state) => {
       const normalized = nodes.map(normalizeNode);
+      const selected = state.selectedNode
+        ? normalized.find((node) => node.id === state.selectedNode?.id) ?? null
+        : null;
+
       return {
         nodes: normalized,
-        selectedNode: syncSelectedNode(normalized, state.selectedNode),
+        selectedNode: selected ? normalizeNode(selected) : null,
       };
     }),
-  setEdges: (edges: WorkflowEdge[]) =>
-    set((state) => ({
-      edges,
-      selectedEdgeId: syncSelectedEdge(edges, state.selectedEdgeId),
-    })),
+  setEdges: (edges: WorkflowEdge[]) => set({ edges }),
   setSelectedNode: (node: WorkflowNode | null) =>
-    set((state) => ({
-      selectedNode: node ? normalizeNode(node) : null,
-      selectedEdgeId: node ? null : state.selectedEdgeId,
-    })),
-  setSelectedEdge: (edgeId: string | null) =>
-    set((state) => ({
-      selectedEdgeId: edgeId,
-      selectedNode: edgeId ? null : state.selectedNode,
-    })),
+    set({ selectedNode: node ? normalizeNode(node) : null }),
   createNode: (type, position) =>
     set((state) => {
       const newNode = createWorkflowNode({
@@ -77,12 +44,11 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       return {
         nodes,
         selectedNode: newNode,
-        selectedEdgeId: null,
       };
     }),
   updateNodeData: (id: string, newData: Partial<WorkflowNodeData>) =>
-    set((state) => ({
-      nodes: state.nodes.map((node) =>
+    set((state) => {
+      const nodes = state.nodes.map((node) =>
         node.id === id
           ? {
               ...node,
@@ -92,18 +58,17 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
               }),
             }
           : node
-      ),
-      selectedNode:
-        state.selectedNode?.id === id
-          ? {
-              ...state.selectedNode,
-              data: normalizeNodeData(state.selectedNode.type, {
-                ...state.selectedNode.data,
-                ...newData,
-              }),
-            }
-          : state.selectedNode,
-    })),
+      );
+
+      const selected = state.selectedNode
+        ? nodes.find((node) => node.id === state.selectedNode?.id) ?? null
+        : null;
+
+      return {
+        nodes,
+        selectedNode: selected ? normalizeNode(selected) : null,
+      };
+    }),
   deleteNode: (id: string) =>
     set((state) => {
       const nodes = state.nodes.filter((node) => node.id !== id);
@@ -111,32 +76,14 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         (edge) => edge.source !== id && edge.target !== id
       );
 
+      const selected = state.selectedNode
+        ? nodes.find((node) => node.id === state.selectedNode?.id) ?? null
+        : null;
+
       return {
         nodes,
         edges,
-        selectedNode: syncSelectedNode(nodes, state.selectedNode),
-        selectedEdgeId: syncSelectedEdge(edges, state.selectedEdgeId),
+        selectedNode: selected ? normalizeNode(selected) : null,
       };
     }),
-  deleteEdge: (id: string) =>
-    set((state) => {
-      const edges = state.edges.filter((edge) => edge.id !== id);
-
-      return {
-        edges,
-        selectedEdgeId: syncSelectedEdge(edges, state.selectedEdgeId),
-      };
-    }),
-  deleteSelection: () => {
-    const { selectedEdgeId, selectedNode, deleteEdge, deleteNode } = get();
-
-    if (selectedEdgeId) {
-      deleteEdge(selectedEdgeId);
-      return;
-    }
-
-    if (selectedNode) {
-      deleteNode(selectedNode.id);
-    }
-  },
 }));

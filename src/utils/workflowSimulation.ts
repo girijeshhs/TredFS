@@ -12,9 +12,6 @@ export const getStartNodes = (
     (node): node is WorkflowNodeByType["start"] => node.type === "start"
   );
 
-export const hasStartNode = (nodes: WorkflowNode[]): boolean =>
-  getStartNodes(nodes).length > 0;
-
 const getNodeLabel = (node: WorkflowNode): string => {
   switch (node.type) {
     case "task": {

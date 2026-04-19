@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   ReactFlowProvider,
+  MiniMap,
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
@@ -30,8 +31,7 @@ function WorkflowCanvasInner() {
   const deleteNode = useWorkflowStore((state) => state.deleteNode);
   const selectedNode = useWorkflowStore((state) => state.selectedNode);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
-  const { project } = useReactFlow();
-  const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
+  const { screenToFlowPosition } = useReactFlow();
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -89,19 +89,18 @@ function WorkflowCanvasInner() {
       event.preventDefault();
 
       const nodeType = getDraggedNodeType(event.dataTransfer);
-      if (!nodeType || !reactFlowWrapper.current) {
+      if (!nodeType) {
         return;
       }
 
-      const bounds = reactFlowWrapper.current.getBoundingClientRect();
-      const position = project({
-        x: event.clientX - bounds.left,
-        y: event.clientY - bounds.top,
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
       });
 
       createNode(nodeType, position);
     },
-    [createNode, project]
+    [createNode, screenToFlowPosition]
   );
 
   useEffect(() => {
@@ -145,12 +144,14 @@ function WorkflowCanvasInner() {
   }, [deleteNode, edges, selectedEdgeId, selectedNode, setEdges]);
 
   return (
-    <div
-      ref={reactFlowWrapper}
-      className="h-full w-full"
-      onDrop={onDrop}
-      onDragOver={onDragOver}
-    >
+    <div className="relative h-full w-full" onDrop={onDrop} onDragOver={onDragOver}>
+      {nodes.length === 0 && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6 text-center">
+          <p className="max-w-md rounded-md border border-zinc-200 bg-white/90 px-4 py-3 text-sm text-zinc-600 shadow-sm">
+            Drag nodes from the palette to start building a workflow
+          </p>
+        </div>
+      )}
       <ReactFlow
         className="h-full w-full"
         nodes={nodes}
@@ -164,7 +165,15 @@ function WorkflowCanvasInner() {
         onPaneClick={onPaneClick}
         deleteKeyCode={null}
         fitView
-      />
+      >
+        <MiniMap
+          position="bottom-right"
+          nodeColor="#18181b"
+          pannable
+          zoomable
+          className="!border !border-zinc-200 !bg-white"
+        />
+      </ReactFlow>
     </div>
   );
 }

@@ -6,8 +6,15 @@ import type {
 } from "@/store/types";
 
 const defaultNodeData: NodeDataByType = {
-  start: { label: "Start" },
-  task: { label: "Task", title: "", description: "", assignee: "" },
+  start: { label: "Start", title: "Start", metadata: {} },
+  task: {
+    label: "Task",
+    title: "",
+    description: "",
+    assignee: "",
+    dueDate: "",
+    customFields: {},
+  },
   approval: {
     label: "Approval",
     title: "",
@@ -19,13 +26,27 @@ const defaultNodeData: NodeDataByType = {
     actionId: "",
     params: {},
   },
-  end: { label: "End" },
+  end: { label: "End", message: "End", summary: false },
 };
 
 export const getDefaultNodeData = <T extends NodeType>(
   type: T
 ): NodeDataByType[T] => {
   const base = defaultNodeData[type];
+
+  if (type === "start") {
+    return {
+      ...base,
+      metadata: { ...base.metadata },
+    } as NodeDataByType[T];
+  }
+
+  if (type === "task") {
+    return {
+      ...base,
+      customFields: { ...base.customFields },
+    } as NodeDataByType[T];
+  }
 
   if (type === "automated") {
     return {

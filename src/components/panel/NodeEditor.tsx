@@ -2,47 +2,56 @@
 
 import ApprovalForm from "@/components/forms/ApprovalForm";
 import AutomatedForm from "@/components/forms/AutomatedForm";
+import EndForm from "@/components/forms/EndForm";
+import StartForm from "@/components/forms/StartForm";
 import TaskForm from "@/components/forms/TaskForm";
-import type { WorkflowNode, WorkflowNodeByType, WorkflowNodeData } from "@/store/types";
+import type {
+  NodeType,
+  WorkflowNode,
+  WorkflowNodeByType,
+  WorkflowNodeData,
+} from "@/store/types";
 import { useWorkflowStore } from "@/store/workflowStore";
 
-type EditableNode =
-  | WorkflowNodeByType["task"]
-  | WorkflowNodeByType["approval"]
-  | WorkflowNodeByType["automated"];
-
-type EditableNodeType = EditableNode["type"];
-
-const isEditableNode = (node: WorkflowNode): node is EditableNode =>
-  node.type === "task" ||
-  node.type === "approval" ||
-  node.type === "automated";
-
-const formRenderers: Record<
-  EditableNodeType,
+const formMap: Record<
+  NodeType,
   (
-    node: WorkflowNodeByType[EditableNodeType],
+    node: WorkflowNode,
     onChange: (id: string, data: Partial<WorkflowNodeData>) => void
   ) => React.ReactNode
 > = {
+  start: (node, onChange) => (
+    <StartForm
+      nodeId={node.id}
+      data={(node as WorkflowNodeByType["start"]).data}
+      onChange={onChange}
+    />
+  ),
   task: (node, onChange) => (
     <TaskForm
       nodeId={node.id}
-      data={node.data as WorkflowNodeByType["task"]["data"]}
+      data={(node as WorkflowNodeByType["task"]).data}
       onChange={onChange}
     />
   ),
   approval: (node, onChange) => (
     <ApprovalForm
       nodeId={node.id}
-      data={node.data as WorkflowNodeByType["approval"]["data"]}
+      data={(node as WorkflowNodeByType["approval"]).data}
       onChange={onChange}
     />
   ),
   automated: (node, onChange) => (
     <AutomatedForm
       nodeId={node.id}
-      data={node.data as WorkflowNodeByType["automated"]["data"]}
+      data={(node as WorkflowNodeByType["automated"]).data}
+      onChange={onChange}
+    />
+  ),
+  end: (node, onChange) => (
+    <EndForm
+      nodeId={node.id}
+      data={(node as WorkflowNodeByType["end"]).data}
       onChange={onChange}
     />
   ),
@@ -60,11 +69,7 @@ export default function NodeEditor() {
   const typeLabel =
     selectedNode.type.charAt(0).toUpperCase() + selectedNode.type.slice(1);
 
-  const content = isEditableNode(selectedNode)
-    ? formRenderers[selectedNode.type](selectedNode, updateNodeData)
-    : (
-        <p className="text-sm text-zinc-500">No editable fields.</p>
-      );
+  const content = formMap[selectedNode.type](selectedNode, updateNodeData);
 
   return (
     <aside className="h-full w-80 border-l border-zinc-200 bg-white p-4">

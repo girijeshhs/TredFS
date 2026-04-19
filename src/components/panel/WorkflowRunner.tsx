@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { canSimulateWorkflow, simulateWorkflowAPI } from "@/api/mock";
+import { simulateWorkflowAPI } from "@/api/mock";
 import type { SimulationResult } from "@/store/types";
 import { useWorkflowStore } from "@/store/workflowStore";
 
@@ -14,7 +14,6 @@ export default function WorkflowRunner() {
     warnings: [],
   });
   const [isLoading, setIsLoading] = useState(false);
-  const canRun = canSimulateWorkflow({ nodes, edges });
 
   const hasOutput = result.steps.length > 0 || result.warnings.length > 0;
 
@@ -43,9 +42,9 @@ export default function WorkflowRunner() {
         <button
           type="button"
           onClick={handleRun}
-          disabled={!canRun || isLoading}
+          disabled={isLoading}
           className={`rounded-md border border-zinc-200 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white ${
-            canRun && !isLoading
+            !isLoading
               ? "bg-zinc-900 hover:bg-zinc-800"
               : "cursor-not-allowed bg-zinc-400"
           }`}
@@ -55,11 +54,6 @@ export default function WorkflowRunner() {
       </div>
 
       <div className="mt-3 text-sm">
-        {!canRun && (
-          <p className="text-xs text-amber-700">
-            Add a Start node to run the workflow.
-          </p>
-        )}
         {!hasOutput && (
           <p className="text-zinc-500">Run workflow to see output.</p>
         )}

@@ -2,6 +2,8 @@ export type NodeType = "start" | "task" | "approval" | "automated" | "end";
 
 export type StartNodeData = {
   label: string;
+  title: string;
+  metadata: Record<string, string>;
 };
 
 export type TaskNodeData = {
@@ -9,6 +11,8 @@ export type TaskNodeData = {
   title: string;
   description: string;
   assignee: string;
+  dueDate: string;
+  customFields: Record<string, string>;
 };
 
 export type ApprovalNodeData = {
@@ -26,6 +30,8 @@ export type AutomatedNodeData = {
 
 export type EndNodeData = {
   label: string;
+  message: string;
+  summary: boolean;
 };
 
 export type NodeDataByType = {

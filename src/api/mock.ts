@@ -3,7 +3,6 @@ import type {
   WorkflowEdge,
   WorkflowNode,
 } from "@/store/types";
-import { hasStartNode, simulateWorkflow } from "@/utils/workflowSimulation";
 
 export type Automation = {
   id: string;
@@ -11,34 +10,40 @@ export type Automation = {
   params: string[];
 };
 
-export const getAutomations = (): Automation[] => [
-  { id: "send_email", label: "Send Email", params: ["to", "subject"] },
-  {
-    id: "generate_doc",
-    label: "Generate Document",
-    params: ["template", "recipient"],
-  },
-];
-
 export type WorkflowSimulationPayload = {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
 };
 
-export const canSimulateWorkflow = (
-  workflow: WorkflowSimulationPayload
-): boolean => hasStartNode(workflow.nodes);
+export const getAutomations = async (): Promise<Automation[]> => {
+  const response = await fetch("/api/automations", {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load automations.");
+  }
+
+  return (await response.json()) as Automation[];
+};
 
 export const simulateWorkflowAPI = async (
   workflow: WorkflowSimulationPayload
 ): Promise<SimulationResult> => {
-  // Keep async behavior to mimic a real API call.
-  await new Promise((resolve) => setTimeout(resolve, 120));
+  const response = await fetch("/api/simulate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(workflow),
+  });
 
-  const result = simulateWorkflow(workflow.nodes, workflow.edges);
+  if (!response.ok) {
+    return {
+      steps: [],
+      warnings: ["Simulation request failed."],
+    };
+  }
 
-  return {
-    steps: result.steps,
-    warnings: result.warnings,
-  };
+  return (await response.json()) as SimulationResult;
 };

@@ -1,4 +1,6 @@
-import { getAutomations } from "@/api/mock";
+import { useEffect, useState } from "react";
+
+import { getAutomations, type Automation } from "@/api/mock";
 import type { AutomatedNodeData } from "@/store/types";
 import { inputClassName, labelClassName } from "./formStyles";
 
@@ -13,7 +15,35 @@ export default function AutomatedForm({
   data,
   onChange,
 }: AutomatedFormProps) {
-  const automations = getAutomations();
+  const [automations, setAutomations] = useState<Automation[]>([]);
+  const [loadingAutomations, setLoadingAutomations] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadAutomations = async () => {
+      setLoadingAutomations(true);
+
+      try {
+        const response = await getAutomations();
+
+        if (mounted) {
+          setAutomations(response);
+        }
+      } finally {
+        if (mounted) {
+          setLoadingAutomations(false);
+        }
+      }
+    };
+
+    void loadAutomations();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const selectedAction = automations.find(
     (automation) => automation.id === data.actionId
   );
@@ -65,9 +95,12 @@ export default function AutomatedForm({
           id="automated-action"
           className={inputClassName}
           value={data.actionId}
+          disabled={loadingAutomations}
           onChange={(event) => handleActionChange(event.target.value)}
         >
-          <option value="">Select an action</option>
+          <option value="">
+            {loadingAutomations ? "Loading actions..." : "Select an action"}
+          </option>
           {automations.map((action) => (
             <option key={action.id} value={action.id}>
               {action.label}

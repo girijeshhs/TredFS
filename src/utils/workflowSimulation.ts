@@ -29,10 +29,14 @@ const getNodeLabel = (node: WorkflowNode): string => {
       const title = node.data.title.trim();
       return title || "Automated Step";
     }
-    case "start":
-      return node.data.label || "Start";
-    case "end":
-      return node.data.label || "End";
+    case "start": {
+      const title = node.data.title.trim();
+      return title || node.data.label || "Start";
+    }
+    case "end": {
+      const message = node.data.message.trim();
+      return message || node.data.label || "End";
+    }
   }
 };
 
@@ -56,6 +60,18 @@ export const simulateWorkflow = (
 
   if (startNodes.length > 1) {
     warnings.add("Multiple Start nodes found; using the first.");
+  }
+
+  const startNodesWithIncoming = startNodes.filter((startNode) =>
+    edges.some((edge) => edge.target === startNode.id)
+  );
+
+  if (startNodesWithIncoming.length > 0) {
+    warnings.add(
+      `Start node must not have incoming edges: ${startNodesWithIncoming
+        .map(getNodeLabel)
+        .join(", ")}.`
+    );
   }
 
   const nodeById = new Map(nodes.map((node) => [node.id, node]));

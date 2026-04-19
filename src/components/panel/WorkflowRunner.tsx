@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 
+import { simulateWorkflowAPI } from "@/api/mock";
 import type { SimulationResult } from "@/store/types";
 import { useWorkflowStore } from "@/store/workflowStore";
-import { hasStartNode, simulateWorkflow } from "@/utils/workflowSimulation";
+import { hasStartNode } from "@/utils/workflowSimulation";
 
 export default function WorkflowRunner() {
   const nodes = useWorkflowStore((state) => state.nodes);
@@ -17,8 +18,9 @@ export default function WorkflowRunner() {
 
   const hasOutput = result.steps.length > 0 || result.warnings.length > 0;
 
-  const handleRun = () => {
-    setResult(simulateWorkflow(nodes, edges));
+  const handleRun = async () => {
+    const simulation = await simulateWorkflowAPI({ nodes, edges });
+    setResult(simulation);
   };
 
   return (

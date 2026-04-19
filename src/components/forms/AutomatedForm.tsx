@@ -1,4 +1,4 @@
-import { getMockAutomatedAction, mockAutomatedActions } from "@/api/mockActions";
+import { getAutomations } from "@/api/mock";
 import type { AutomatedNodeData } from "@/store/types";
 import { inputClassName, labelClassName } from "./formStyles";
 
@@ -13,11 +13,14 @@ export default function AutomatedForm({
   data,
   onChange,
 }: AutomatedFormProps) {
-  const selectedAction = getMockAutomatedAction(data.actionId);
+  const automations = getAutomations();
+  const selectedAction = automations.find(
+    (automation) => automation.id === data.actionId
+  );
   const paramKeys = selectedAction?.params ?? [];
 
   const handleActionChange = (actionId: string) => {
-    const action = getMockAutomatedAction(actionId);
+    const action = automations.find((automation) => automation.id === actionId);
     const params: Record<string, string> = {};
 
     for (const paramKey of action?.params ?? []) {
@@ -65,7 +68,7 @@ export default function AutomatedForm({
           onChange={(event) => handleActionChange(event.target.value)}
         >
           <option value="">Select an action</option>
-          {mockAutomatedActions.map((action) => (
+          {automations.map((action) => (
             <option key={action.id} value={action.id}>
               {action.label}
             </option>

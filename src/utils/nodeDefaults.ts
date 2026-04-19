@@ -81,6 +81,7 @@ export function normalizeNode(
 export function normalizeNode(
   node: WorkflowNodeByType["end"]
 ): WorkflowNodeByType["end"];
+export function normalizeNode(node: WorkflowNode): WorkflowNode;
 export function normalizeNode(node: WorkflowNode): WorkflowNode {
   return {
     ...node,
@@ -128,6 +129,12 @@ export function createWorkflowNode(
     data?: Partial<NodeDataByType["end"]>;
   }
 ): WorkflowNodeByType["end"];
+export function createWorkflowNode(params: {
+  id: string;
+  type: NodeType;
+  position: { x: number; y: number };
+  data?: Partial<NodeDataByType[NodeType]>;
+}): WorkflowNode;
 export function createWorkflowNode(params: {
   id: string;
   type: NodeType;

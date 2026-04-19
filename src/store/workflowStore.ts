@@ -13,6 +13,30 @@ import type {
   WorkflowState,
 } from "./types";
 
+const mergeNodeData = (
+  node: WorkflowNode,
+  newData: Partial<WorkflowNodeData>
+): WorkflowNode =>
+  ({
+    ...node,
+    data: normalizeNodeData(node.type, {
+      ...node.data,
+      ...newData,
+    } as Partial<WorkflowNodeData>),
+  }) as WorkflowNode;
+
+const normalizeSelectedNode = (
+  nodes: WorkflowNode[],
+  selectedNode: WorkflowNode | null
+): WorkflowNode | null => {
+  if (!selectedNode) {
+    return null;
+  }
+
+  const selected = nodes.find((node) => node.id === selectedNode.id) ?? null;
+  return selected ? normalizeNode(selected) : null;
+};
+
 export const useWorkflowStore = create<WorkflowState>((set) => ({
   nodes: [],
   edges: [],
@@ -20,13 +44,10 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
   setNodes: (nodes: WorkflowNode[]) =>
     set((state) => {
       const normalized = nodes.map(normalizeNode);
-      const selected = state.selectedNode
-        ? normalized.find((node) => node.id === state.selectedNode?.id) ?? null
-        : null;
 
       return {
         nodes: normalized,
-        selectedNode: selected ? normalizeNode(selected) : null,
+        selectedNode: normalizeSelectedNode(normalized, state.selectedNode),
       };
     }),
   setEdges: (edges: WorkflowEdge[]) => set({ edges }),
@@ -49,24 +70,12 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
   updateNodeData: (id: string, newData: Partial<WorkflowNodeData>) =>
     set((state) => {
       const nodes = state.nodes.map((node) =>
-        node.id === id
-          ? {
-              ...node,
-              data: normalizeNodeData(node.type, {
-                ...node.data,
-                ...newData,
-              }),
-            }
-          : node
+        node.id === id ? mergeNodeData(node, newData) : node
       );
-
-      const selected = state.selectedNode
-        ? nodes.find((node) => node.id === state.selectedNode?.id) ?? null
-        : null;
 
       return {
         nodes,
-        selectedNode: selected ? normalizeNode(selected) : null,
+        selectedNode: normalizeSelectedNode(nodes, state.selectedNode),
       };
     }),
   deleteNode: (id: string) =>
@@ -76,14 +85,10 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
         (edge) => edge.source !== id && edge.target !== id
       );
 
-      const selected = state.selectedNode
-        ? nodes.find((node) => node.id === state.selectedNode?.id) ?? null
-        : null;
-
       return {
         nodes,
         edges,
-        selectedNode: selected ? normalizeNode(selected) : null,
+        selectedNode: normalizeSelectedNode(nodes, state.selectedNode),
       };
     }),
 }));

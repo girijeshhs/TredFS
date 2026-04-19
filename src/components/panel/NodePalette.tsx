@@ -7,6 +7,7 @@ const paletteItems: Array<{ type: NodeType; label: string }> = [
   { type: "start", label: "Start" },
   { type: "task", label: "Task" },
   { type: "approval", label: "Approval" },
+  { type: "automated", label: "Automated Step" },
   { type: "end", label: "End" },
 ];
 

@@ -1,18 +1,22 @@
 "use client";
 
 import ApprovalForm from "@/components/forms/ApprovalForm";
+import AutomatedForm from "@/components/forms/AutomatedForm";
 import TaskForm from "@/components/forms/TaskForm";
 import type { WorkflowNode, WorkflowNodeByType, WorkflowNodeData } from "@/store/types";
 import { useWorkflowStore } from "@/store/workflowStore";
 
 type EditableNode =
   | WorkflowNodeByType["task"]
-  | WorkflowNodeByType["approval"];
+  | WorkflowNodeByType["approval"]
+  | WorkflowNodeByType["automated"];
 
 type EditableNodeType = EditableNode["type"];
 
 const isEditableNode = (node: WorkflowNode): node is EditableNode =>
-  node.type === "task" || node.type === "approval";
+  node.type === "task" ||
+  node.type === "approval" ||
+  node.type === "automated";
 
 const formRenderers: Record<
   EditableNodeType,
@@ -32,6 +36,13 @@ const formRenderers: Record<
     <ApprovalForm
       nodeId={node.id}
       data={node.data as WorkflowNodeByType["approval"]["data"]}
+      onChange={onChange}
+    />
+  ),
+  automated: (node, onChange) => (
+    <AutomatedForm
+      nodeId={node.id}
+      data={node.data as WorkflowNodeByType["automated"]["data"]}
       onChange={onChange}
     />
   ),

@@ -25,6 +25,10 @@ const getNodeLabel = (node: WorkflowNode): string => {
       const title = node.data.title.trim();
       return title || node.data.label || "Approval";
     }
+    case "automated": {
+      const title = node.data.title.trim();
+      return title || "Automated Step";
+    }
     case "start":
       return node.data.label || "Start";
     case "end":

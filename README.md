@@ -1,94 +1,36 @@
-# HR Workflow Designer
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A React Flow based visual editor for building and simulating HR process workflows.
+## Getting Started
 
-## Overview
-
-This project provides a browser-based workflow design experience where users can compose HR flows using typed nodes (`Start`, `Task`, `Approval`, `End`), connect them on a canvas, configure node metadata, and run a deterministic simulation.
-
-It was built to offer a lightweight internal tool for modeling approval and task routing logic without introducing backend complexity, while still enforcing basic workflow correctness checks.
-
-## Features
-
-- Drag-and-drop node creation from a left-side node palette onto the React Flow canvas.
-- Node editing panel for `Task` and `Approval` nodes:
-- `Task`: title, description, assignee.
-- `Approval`: title, approver role, threshold.
-- Workflow simulation runner that traverses from `Start` and produces ordered execution steps.
-- Validation and safety warnings during simulation:
-- Missing start node blocks execution.
-- Multiple start nodes detected (first start node is used).
-- Disconnected nodes reported.
-- Additional runtime warnings for cycles, missing edge targets, and multi-outgoing branches (first edge used).
-
-## Architecture
-
-- Canvas (React Flow)
-- `WorkflowCanvas` hosts the flow surface, applies node/edge changes, supports connections, and handles drag-drop placement via projected coordinates.
-- Custom node renderers (`StartNode`, `TaskNode`, `ApprovalNode`, `EndNode`) are registered through a `nodeTypes` map.
-
-- Store (Zustand)
-- Central state in `workflowStore` manages `nodes`, `edges`, and `selectedNode`.
-- Store actions cover node creation, node/edge updates, selection sync, and typed node data updates.
-- Node data is normalized through shared defaults to keep shape consistency across edits.
-
-- Components (nodes, forms, panel)
-- `NodePalette` exposes draggable node types.
-- `NodeEditor` conditionally renders typed forms (`TaskForm`, `ApprovalForm`) based on selected node.
-- `WorkflowRunner` executes simulation and displays steps plus warnings.
-- Layout composition in `src/app/page.tsx`: palette (left), canvas + runner (center), editor (right).
-
-- Utils (simulation + validation)
-- `workflowSimulation.ts` contains traversal and validation logic (`hasStartNode`, `simulateWorkflow`).
-- Simulation is intentionally linear and deterministic: it follows the first outgoing edge.
-- Utility modules also isolate drag-drop transport, node defaults/normalization, and node ID generation.
-
-## Tech Stack
-
-- Next.js (App Router)
-- TypeScript
-- Zustand
-- React Flow
-- Tailwind CSS
-
-## How to Run
+First, run the development server:
 
 ```bash
-npm install
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Application runs at `http://localhost:3000`.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Usage
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-1. Drag nodes from the **Node Palette** into the canvas.
-2. Connect nodes by drawing edges from source handles to target handles.
-3. Click a `Task` or `Approval` node to edit its fields in the **Node Editor**.
-4. Click **Run Workflow** in the simulation panel to execute and inspect:
-- Step order.
-- Validation warnings (for example: multiple start nodes or disconnected nodes).
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Design Decisions
+## Learn More
 
-- Zustand for state management:
-- Minimal API surface, low boilerplate, and straightforward co-location of state/actions for an interaction-heavy canvas.
+To learn more about Next.js, take a look at the following resources:
 
-- Utility-first separation of logic:
-- Simulation and data normalization are kept outside UI components to make behavior testable and easier to evolve.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-- Minimal UI by design:
-- Prioritized workflow behavior and correctness over visual complexity to keep implementation focused and maintainable.
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Tradeoffs
+## Deploy on Vercel
 
-- Branch semantics are simplified: when a node has multiple outgoing edges, simulation follows only the first edge.
-- No persistence layer: workflows are in-memory and reset on refresh.
-- No node/edge deletion UX, undo/redo, or version history in the current implementation.
-- Validation is surfaced as runtime warnings in the simulator rather than as hard authoring constraints.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## Future Improvements
-
-- Add node and edge deletion flows with clear affordances.
-- Add persistence (local storage and/or backend API) for save/load workflows.
-- Improve UI/UX with richer node states, better empty states, and interaction feedback.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

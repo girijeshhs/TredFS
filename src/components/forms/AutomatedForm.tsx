@@ -1,0 +1,92 @@
+import { getMockAutomatedAction, mockAutomatedActions } from "@/api/mockActions";
+import type { AutomatedNodeData } from "@/store/types";
+import { inputClassName, labelClassName } from "./formStyles";
+
+type AutomatedFormProps = {
+  nodeId: string;
+  data: AutomatedNodeData;
+  onChange: (id: string, newData: Partial<AutomatedNodeData>) => void;
+};
+
+export default function AutomatedForm({
+  nodeId,
+  data,
+  onChange,
+}: AutomatedFormProps) {
+  const selectedAction = getMockAutomatedAction(data.actionId);
+  const paramKeys = selectedAction?.params ?? [];
+
+  const handleActionChange = (actionId: string) => {
+    const action = getMockAutomatedAction(actionId);
+    const params: Record<string, string> = {};
+
+    for (const paramKey of action?.params ?? []) {
+      params[paramKey] = data.params[paramKey] ?? "";
+    }
+
+    onChange(nodeId, {
+      actionId,
+      params,
+    });
+  };
+
+  const handleParamChange = (paramKey: string, value: string) => {
+    onChange(nodeId, {
+      params: {
+        ...data.params,
+        [paramKey]: value,
+      },
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className={labelClassName} htmlFor="automated-title">
+          Title
+        </label>
+        <input
+          id="automated-title"
+          className={inputClassName}
+          type="text"
+          value={data.title}
+          onChange={(event) => onChange(nodeId, { title: event.target.value })}
+        />
+      </div>
+
+      <div>
+        <label className={labelClassName} htmlFor="automated-action">
+          Action
+        </label>
+        <select
+          id="automated-action"
+          className={inputClassName}
+          value={data.actionId}
+          onChange={(event) => handleActionChange(event.target.value)}
+        >
+          <option value="">Select an action</option>
+          {mockAutomatedActions.map((action) => (
+            <option key={action.id} value={action.id}>
+              {action.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {paramKeys.map((paramKey) => (
+        <div key={paramKey}>
+          <label className={labelClassName} htmlFor={`automated-${paramKey}`}>
+            {paramKey}
+          </label>
+          <input
+            id={`automated-${paramKey}`}
+            className={inputClassName}
+            type="text"
+            value={data.params[paramKey] ?? ""}
+            onChange={(event) => handleParamChange(paramKey, event.target.value)}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}

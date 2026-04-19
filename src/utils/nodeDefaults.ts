@@ -14,12 +14,28 @@ const defaultNodeData: NodeDataByType = {
     approverRole: "",
     threshold: 0,
   },
+  automated: {
+    title: "",
+    actionId: "",
+    params: {},
+  },
   end: { label: "End" },
 };
 
 export const getDefaultNodeData = <T extends NodeType>(
   type: T
-): NodeDataByType[T] => ({ ...defaultNodeData[type] } as NodeDataByType[T]);
+): NodeDataByType[T] => {
+  const base = defaultNodeData[type];
+
+  if (type === "automated") {
+    return {
+      ...base,
+      params: { ...base.params },
+    } as NodeDataByType[T];
+  }
+
+  return { ...base } as NodeDataByType[T];
+};
 
 export const normalizeNodeData = <T extends NodeType>(
   type: T,
@@ -38,6 +54,9 @@ export function normalizeNode(
 export function normalizeNode(
   node: WorkflowNodeByType["approval"]
 ): WorkflowNodeByType["approval"];
+export function normalizeNode(
+  node: WorkflowNodeByType["automated"]
+): WorkflowNodeByType["automated"];
 export function normalizeNode(
   node: WorkflowNodeByType["end"]
 ): WorkflowNodeByType["end"];
@@ -75,6 +94,14 @@ export function createWorkflowNode(
 export function createWorkflowNode(
   params: {
     id: string;
+    type: "automated";
+    position: { x: number; y: number };
+    data?: Partial<NodeDataByType["automated"]>;
+  }
+): WorkflowNodeByType["automated"];
+export function createWorkflowNode(
+  params: {
+    id: string;
     type: "end";
     position: { x: number; y: number };
     data?: Partial<NodeDataByType["end"]>;
@@ -98,4 +125,5 @@ export const isNodeType = (value: string | undefined): value is NodeType =>
   value === "start" ||
   value === "task" ||
   value === "approval" ||
+  value === "automated" ||
   value === "end";

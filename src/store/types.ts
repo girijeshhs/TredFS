@@ -1,4 +1,4 @@
-export type NodeType = "start" | "task" | "approval" | "end";
+export type NodeType = "start" | "task" | "approval" | "automated" | "end";
 
 export type StartNodeData = {
   label: string;
@@ -18,6 +18,12 @@ export type ApprovalNodeData = {
   threshold: number;
 };
 
+export type AutomatedNodeData = {
+  title: string;
+  actionId: string;
+  params: Record<string, string>;
+};
+
 export type EndNodeData = {
   label: string;
 };
@@ -26,6 +32,7 @@ export type NodeDataByType = {
   start: StartNodeData;
   task: TaskNodeData;
   approval: ApprovalNodeData;
+  automated: AutomatedNodeData;
   end: EndNodeData;
 };
 

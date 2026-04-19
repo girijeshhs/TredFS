@@ -3,7 +3,7 @@ import type {
   WorkflowEdge,
   WorkflowNode,
 } from "@/store/types";
-import { simulateWorkflow } from "@/utils/workflowSimulation";
+import { hasStartNode, simulateWorkflow } from "@/utils/workflowSimulation";
 
 export type Automation = {
   id: string;
@@ -24,6 +24,10 @@ export type WorkflowSimulationPayload = {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
 };
+
+export const canSimulateWorkflow = (
+  workflow: WorkflowSimulationPayload
+): boolean => hasStartNode(workflow.nodes);
 
 export const simulateWorkflowAPI = async (
   workflow: WorkflowSimulationPayload

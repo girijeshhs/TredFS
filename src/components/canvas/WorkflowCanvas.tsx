@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import ReactFlow, {
   ReactFlowProvider,
   addEdge,
@@ -8,6 +8,7 @@ import ReactFlow, {
   applyNodeChanges,
   useReactFlow,
   type Connection,
+  type EdgeMouseHandler,
   type EdgeChange,
   type NodeChange,
   type NodeMouseHandler,
@@ -26,6 +27,8 @@ function WorkflowCanvasInner() {
   const setEdges = useWorkflowStore((state) => state.setEdges);
   const createNode = useWorkflowStore((state) => state.createNode);
   const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
+  const setSelectedEdge = useWorkflowStore((state) => state.setSelectedEdge);
+  const deleteSelection = useWorkflowStore((state) => state.deleteSelection);
   const { project } = useReactFlow();
   const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
 
@@ -61,9 +64,17 @@ function WorkflowCanvasInner() {
     [setSelectedNode]
   );
 
+  const onEdgeClick: EdgeMouseHandler = useCallback(
+    (_event, edge) => {
+      setSelectedEdge(edge.id);
+    },
+    [setSelectedEdge]
+  );
+
   const onPaneClick = useCallback(() => {
     setSelectedNode(null);
-  }, [setSelectedNode]);
+    setSelectedEdge(null);
+  }, [setSelectedEdge, setSelectedNode]);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -90,6 +101,35 @@ function WorkflowCanvasInner() {
     [createNode, project]
   );
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Delete") {
+        return;
+      }
+
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      const isEditable =
+        target?.isContentEditable ||
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select";
+
+      if (isEditable) {
+        return;
+      }
+
+      event.preventDefault();
+      deleteSelection();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [deleteSelection]);
+
   return (
     <div
       ref={reactFlowWrapper}
@@ -106,7 +146,9 @@ function WorkflowCanvasInner() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
+        onEdgeClick={onEdgeClick}
         onPaneClick={onPaneClick}
+        deleteKeyCode={null}
         fitView
       />
     </div>

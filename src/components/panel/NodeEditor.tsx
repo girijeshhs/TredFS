@@ -51,6 +51,7 @@ const formRenderers: Record<
 export default function NodeEditor() {
   const selectedNode = useWorkflowStore((state) => state.selectedNode);
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
+  const deleteNode = useWorkflowStore((state) => state.deleteNode);
 
   if (!selectedNode) {
     return null;
@@ -75,6 +76,15 @@ export default function NodeEditor() {
         <div className="text-xs text-zinc-500">{selectedNode.id}</div>
       </div>
       {content}
+      <div className="mt-4 border-t border-zinc-200 pt-4">
+        <button
+          type="button"
+          onClick={() => deleteNode(selectedNode.id)}
+          className="w-full rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"
+        >
+          Delete Node
+        </button>
+      </div>
     </aside>
   );
 }

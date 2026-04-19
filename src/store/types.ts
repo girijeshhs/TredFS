@@ -65,9 +65,14 @@ export type WorkflowState = {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
   selectedNode: WorkflowNode | null;
+  selectedEdgeId: string | null;
   setNodes: (nodes: WorkflowNode[]) => void;
   setEdges: (edges: WorkflowEdge[]) => void;
   setSelectedNode: (node: WorkflowNode | null) => void;
+  setSelectedEdge: (edgeId: string | null) => void;
   createNode: (type: NodeType, position: { x: number; y: number }) => void;
   updateNodeData: (id: string, newData: Partial<WorkflowNodeData>) => void;
+  deleteNode: (id: string) => void;
+  deleteEdge: (id: string) => void;
+  deleteSelection: () => void;
 };
